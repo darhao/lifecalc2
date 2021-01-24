@@ -1,0 +1,48 @@
+<Configuration>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%highlight{[%level]%d{yyyy-MM-dd HH:mm:ss:SSS} [%thread] - %msg%n}" />
+        </Console>
+
+        <JDBC name="JDBC" tableName="server_log">
+            <ThresholdFilter level="INFO" />
+            <ConnectionFactory
+                    class="cc.darhao.lifecalc.config.Log4j2DataSourceHolder"
+                    method="getConnection" />
+            <Column name="time" pattern="%d{yyyy-MM-dd HH:mm:ss.SSS}" />
+            <Column name="level" pattern="%level" />
+            <Column name="thread" pattern="%thread" />
+            <Column name="message" pattern="%msg" />
+        </JDBC>
+
+        <!-- 此处邮箱配置信息可以自定义 -->
+        <SMTP name="SMTP" subject="LifeCalc服务器异常警告" from="darhao@qq.com"
+              to="darhao@qq.com" smtpHost="smtp.qq.com" smtpPort="465"
+              smtpUsername="darhao@qq.com" smtpPassword="gkermdqejmczbddi"
+              smtpDebug="false" smtpProtocol="smtps">
+            <ThresholdFilter level="ERROR" />
+        </SMTP>
+
+        <Async name="root" bufferSize="65536">
+            <AppenderRef ref="Console" />
+        </Async>
+
+        <Async name="root2" bufferSize="65536">
+            <AppenderRef ref="SMTP" />
+            <AppenderRef ref="JDBC" />
+        </Async>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="root" />
+        </Root>
+        <Logger name="cc.darhao" level="OFF">
+            <AppenderRef ref="root2" />
+        </Logger>
+    </Loggers>
+
+</Configuration>
