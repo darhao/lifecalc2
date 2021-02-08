@@ -24,7 +24,7 @@ public class PlanBodyItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "阶段命名")
+    @ApiModelProperty(value = "计划细节名")
     private String name;
 
     @ApiModelProperty(value = "第几年开始")
@@ -37,6 +37,9 @@ public class PlanBodyItem implements Serializable {
     private Integer net;
 
     @ApiModelProperty(value = "年净收入增长率")
-    private Float rate;
+    private Float netRate;
+
+    @ApiModelProperty(value = "理财年化收益率")
+    private Float earnRate;
 
 }

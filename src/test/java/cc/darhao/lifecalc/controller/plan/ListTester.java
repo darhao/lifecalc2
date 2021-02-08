@@ -159,8 +159,8 @@ class ListTester {
         for (int i = 0; i < 25; i++){
             PlanBody body = new PlanBody();
             List<PlanBodyItem> items = new LinkedList<>();
-            items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setRate(0.2f));
-            items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setRate(0.1f));
+            items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setNetRate(0.2f).setEarnRate(0.2f));
+            items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setNetRate(0.1f).setEarnRate(0.2f));
             body.setAge(20).setCpi(0.03f).setItems(items);
             Plan plan = new Plan();
             plan.setCreateTime(new Date()).setUpdateTime(new Date()).setName("test-plan")
@@ -170,8 +170,8 @@ class ListTester {
         for (int i = 0; i < 5; i++){
             PlanBody body = new PlanBody();
             List<PlanBodyItem> items = new LinkedList<>();
-            items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setRate(0.2f));
-            items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setRate(0.1f));
+            items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setNetRate(0.2f).setEarnRate(0.2f));
+            items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setNetRate(0.1f).setEarnRate(0.2f));
             body.setAge(20).setCpi(0.03f).setItems(items);
             Plan plan = new Plan();
             plan.setCreateTime(new Date()).setUpdateTime(new Date()).setName("test-plan")

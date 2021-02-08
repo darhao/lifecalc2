@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>平凡的人生计算器</title>
+    <link rel="stylesheet" href="../css/reset.css"><!--样式重置-->
+    <link rel="stylesheet" href="../css/element-2-15-0.css">
+    <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <!--顶边栏-->
+        <el-header>
+            <el-row>
+                <!--网站名-->
+                <el-col>
+                    <i class="el-icon-s-flag">平凡的人生计算器</i>
+                </el-col>
+                <!--注册按钮-->
+                <el-col>
+                    <el-link :underline="false">注册</el-link>
+                </el-col>
+                <!--登录按钮-->
+                <el-col>
+                    <el-link :underline="false">登录</el-link>
+                </el-col>
+            </el-row>
+        </el-header>
+        <!--主体-->
+        <el-container>
+            <!--左侧计划列表-->
+            <el-aside>
+                <el-row>
+                    <!--列表名-->
+                    <el-col></el-col>
+                    <!--添加按钮-->
+                    <el-col></el-col>
+                </el-row>
+                <el-row>
+                    <!--计划列表，使用element的table组件-->
+                    <el-col></el-col>
+                </el-row>
+            </el-aside>
+            <!--右侧计划详情-->
+            <el-container>
+                <!--顶边表单-->
+                <el-header>
+                    <el-row>
+                        <!--计划名-->
+                        <el-col></el-col>
+                        <!--计划名输入框-->
+                        <el-col></el-col>
+                        <!--年龄-->
+                        <el-col></el-col>
+                        <!--年龄输入框-->
+                        <el-col></el-col>
+                        <!--cpi-->
+                        <el-col></el-col>
+                        <!--cpi输入框-->
+                        <el-col></el-col>
+                        <!--计算按钮-->
+                        <el-col></el-col>
+                        <!--保存按钮-->
+                        <el-col></el-col>
+                    </el-row>
+                </el-header>
+                <el-container>
+                    <!--左侧计划细节列表-->
+                    <el-aside>
+                        <el-row>
+                            <!--列表名-->
+                            <el-col></el-col>
+                            <!--添加按钮-->
+                            <el-col></el-col>
+                        </el-row>
+                        <el-row>
+                            <!--列表-->
+                            <el-col></el-col>
+                        </el-row>
+                    </el-aside>
+                    <!--右侧计算结果-->
+                    <el-main>
+                        <el-row>
+                            <!--tab栏-->
+                            <el-col></el-col>
+                        </el-row>
+                        <el-row>
+                            <!--计算结果显示主体，使用v-charts-->
+                            <el-col></el-col>
+                        </el-row>
+                    </el-main>
+                </el-container>
+
+            </el-container>
+        </el-container>
+        <!--底边栏-->
+        <el-footer>
+            <el-row>
+                <!--版权信息-->
+                <el-col>
+                    <div>@地航者 {{new Date().getFullYear()}}</div>
+                </el-col>
+                <!--steam-->
+                <el-col>
+                    <el-link href="https://store.steampowered.com/curator/37981326" :underline="false" target="_blank">
+                        <el-image src="../image/steam.png"></el-image>
+                    </el-link>
+                </el-col>
+                <!--github-->
+                <el-col>
+                    <el-link href="https://github.com/darhao" :underline="false" target="_blank">
+                        <el-image src="../image/github.png"></el-image>
+                    </el-link>
+                </el-col>
+                <!--打赏-->
+                <el-col>
+                    <el-link :underline="false">
+                       <el-image src="../image/reward.png" @click="onClickReward"></el-image>
+                    <el-link/>
+                </el-col>
+            </el-row>
+        </el-footer>
+    </el-container>
+</div>
+</body>
+<script src="../js/vue-2-6-12.js"></script>
+<script src="../js/element-2-15-0.js"></script>
+<script src="../js/app.js"></script>
+</html>

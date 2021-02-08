@@ -58,8 +58,8 @@ class UpdateTester {
         token = "test1";
         PlanBody body = new PlanBody();
         List<PlanBodyItem> items = new LinkedList<>();
-        items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setRate(0.2f));
-        items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setRate(0.1f));
+        items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setNetRate(0.2f).setEarnRate(0.2f));
+        items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setNetRate(0.1f).setEarnRate(0.2f));
         body.setAge(20).setCpi(0.03f).setItems(items);
         Assertions.assertEquals(JSON.toJSONString(body),planMapper.selectOne(new QueryWrapper<Plan>().eq("id",planId)).getBody());
         Assertions.assertEquals("test-plan",planMapper.selectOne(new QueryWrapper<Plan>().eq("id",planId)).getName());
@@ -107,8 +107,8 @@ class UpdateTester {
         redisTemplate.opsForValue().set(AccessInterceptor.LIFECALC_USER_TOKEN + "test1", String.valueOf(user1Id));
         PlanBody body = new PlanBody();
         List<PlanBodyItem> items = new LinkedList<>();
-        items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setRate(0.2f));
-        items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setRate(0.1f));
+        items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setNetRate(0.2f).setEarnRate(0.2f));
+        items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setNetRate(0.1f).setEarnRate(0.2f));
         body.setAge(20).setCpi(0.03f).setItems(items);
         Plan plan = new Plan();
         plan.setCreateTime(new Date()).setUpdateTime(new Date()).setName("test-plan")
