@@ -54,7 +54,7 @@ public class PlanController {
     @ApiOperation(value = "列出用户所有计划", notes = "列出指定用户的所有计划，但不返回每个计划的详细内容，即body内的内容")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", paramType = "query", required = true),
-            @ApiImplicitParam(name = "pageNo", value = "页码，不传表示为第一页", paramType = "query"),
+            @ApiImplicitParam(name = "pageNo", value = "页码，不传表示为第一页，每页10条", paramType = "query"),
     })
     @PostMapping("/list")
     @Log("列出所有计划")

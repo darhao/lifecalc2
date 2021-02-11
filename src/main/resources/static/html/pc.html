@@ -3,128 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <title>平凡的人生计算器</title>
-    <link rel="stylesheet" href="../css/reset.css"><!--样式重置-->
     <link rel="stylesheet" href="../css/element-2-15-0.css">
-    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/vcharts/style.min.css">
+    <link rel="stylesheet" href="../css/pc.css">
 </head>
 <body>
 <div id="app">
     <el-container>
+
         <!--顶边栏-->
-        <el-header>
-            <el-row>
+        <el-header class="top-foot-container">
+            <el-row class="top-foot">
                 <!--网站名-->
-                <el-col>
-                    <i class="el-icon-s-flag">平凡的人生计算器</i>
+                <el-col :span="22">
+                    <i id="website-name" class="el-icon-s-flag">&nbsp;&nbsp;平凡的人生计算器</i>
                 </el-col>
                 <!--注册按钮-->
-                <el-col>
-                    <el-link :underline="false">注册</el-link>
+                <el-col :span="1">
+                    <i class="el-icon-paperclip user-sign" @click="onClickSignUp">注册</i>
                 </el-col>
                 <!--登录按钮-->
-                <el-col>
-                    <el-link :underline="false">登录</el-link>
+                <el-col :span="1">
+                    <i class="el-icon-key user-sign" @click="onClickSignIn">登录</i>
                 </el-col>
             </el-row>
         </el-header>
+
         <!--主体-->
-        <el-container>
+        <el-container id="body-area">
             <!--左侧计划列表-->
-            <el-aside>
-                <el-row>
+            <el-main class="border" id="plan-list">
+                <el-row type="flex" justify="center">
                     <!--列表名-->
-                    <el-col></el-col>
+                    <el-col :span="6" class="list-title">我的计划</el-col>
                     <!--添加按钮-->
-                    <el-col></el-col>
+                    <el-col :span="2">
+                        <el-button type="primary" size="mini" icon="el-icon-plus" circle
+                                   @click="onClickPlanAdd"></el-button>
+                    </el-col>
                 </el-row>
                 <el-row>
                     <!--计划列表，使用element的table组件-->
-                    <el-col></el-col>
+                    <el-col>
+                        <el-table :data="planList" :height="665">
+                            <el-table-column label="计划名" width="250">
+                                <template slot-scope="scope">
+                                    <span @click="onClickPlanRow(scope.$index)" class="plan-list-name">
+                                        {{scope.row.name}}
+                                    </span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="修改日期" prop="date" width="100"></el-table-column>
+                            <el-table-column label="操作" width="50">
+                                <template slot-scope="scope">
+                                    <el-button size="mini"
+                                               icon="el-icon-delete"
+                                               circle
+                                               type="danger"
+                                               @click="onClickPlanDelete(scope.$index)">
+                                    </el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-col>
                 </el-row>
-            </el-aside>
+                <!--分页-->
+                <el-row>
+                    <el-col>
+                        <el-pagination
+                                id="plan-pager"
+                                background
+                                layout="prev,pager,next"
+                                :page-count="planTotalPage"
+                                :current-page="planCurrentPage"
+                                :pager-count="5"
+                                @current-change="onPagePlan(pageNo)">
+                        </el-pagination>
+                    </el-col>
+                </el-row>
+            </el-main>
             <!--右侧计划详情-->
-            <el-container>
+            <el-container class="border" id="main-area">
                 <!--顶边表单-->
                 <el-header>
-                    <el-row>
+                    <el-row id="plan-form" :gutter="20">
                         <!--计划名-->
-                        <el-col></el-col>
+                        <el-col :span="1" class="form-attribute">名称</el-col>
                         <!--计划名输入框-->
-                        <el-col></el-col>
+                        <el-col :span="4">
+                            <el-input v-model="planName" placeholder="计划名称，长度不超过16"></el-input>
+                        </el-col>
                         <!--年龄-->
-                        <el-col></el-col>
+                        <el-col :span="1" class="form-attribute">年龄</el-col>
                         <!--年龄输入框-->
-                        <el-col></el-col>
+                        <el-col :span="4">
+                            <el-input v-model="planAge" placeholder="计划开始时年龄(用于显示)"></el-input>
+                        </el-col>
                         <!--cpi-->
-                        <el-col></el-col>
+                        <el-col :span="1" class="form-attribute">CPI</el-col>
                         <!--cpi输入框-->
-                        <el-col></el-col>
+                        <el-col :span="4">
+                            <el-input v-model="planCpi" placeholder="年均CPI涨幅，写成小数"></el-input>
+                        </el-col>
+                        <!--初始资产-->
+                        <el-col :span="1" class="form-attribute">资产</el-col>
+                        <!--初始资产输入框-->
+                        <el-col :span="4">
+                            <el-input v-model="planInit" placeholder="现有资产(可负数，单位元)"></el-input>
+                        </el-col>
                         <!--计算按钮-->
-                        <el-col></el-col>
+                        <el-col :span="2">
+                            <el-button icon="el-icon-s-platform"
+                                       type="primary"
+                                       @click="onClickPlanCalc()">
+                                计算
+                            </el-button>
+                        </el-col>
                         <!--保存按钮-->
-                        <el-col></el-col>
+                        <el-col :span="2">
+                            <el-button icon="el-icon-camera-solid"
+                                       type="success"
+                                       @click="onClickPlanSave()">
+                                保存
+                            </el-button>
+                        </el-col>
                     </el-row>
                 </el-header>
                 <el-container>
                     <!--左侧计划细节列表-->
-                    <el-aside>
-                        <el-row>
+                    <el-main id="plan-details-list">
+                        <el-row type="flex" justify="center">
                             <!--列表名-->
-                            <el-col></el-col>
+                            <el-col :span="6" class="list-title">计划细节</el-col>
                             <!--添加按钮-->
-                            <el-col></el-col>
+                            <el-col :span="2">
+                                <el-button type="primary"
+                                           icon="el-icon-plus"
+                                           circle
+                                           size="mini"
+                                           @click="onClickPlanDetailsAdd">
+                                </el-button>
+                            </el-col>
                         </el-row>
                         <el-row>
                             <!--列表-->
-                            <el-col></el-col>
+                            <el-col>
+                                <el-table :data="planDetailsList"
+                                          @row-click="onClickPlanDetailsRow(row, column, event)" :height="625">
+                                    <el-table-column label="细节名" prop="name"></el-table-column>
+                                    <el-table-column label="起始年" prop="start"></el-table-column>
+                                    <el-table-column label="结束年" prop="end"></el-table-column>
+                                    <el-table-column label="年净收入" prop="net"></el-table-column>
+                                    <el-table-column label="收入增长" prop="netRate"></el-table-column>
+                                    <el-table-column label="理财年化" prop="earnRate"></el-table-column>
+                                    <el-table-column label="操作">
+                                        <template slot-scope="scope">
+                                            <el-button size="mini"
+                                                       icon="el-icon-delete"
+                                                       circle
+                                                       type="danger"
+                                                       @click="onClickPlanDetailsDelete(scope.$index)">
+                                            </el-button>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-col>
                         </el-row>
-                    </el-aside>
+                    </el-main>
                     <!--右侧计算结果-->
-                    <el-main>
+                    <el-main id="result-area">
                         <el-row>
                             <!--tab栏-->
-                            <el-col></el-col>
-                        </el-row>
-                        <el-row>
-                            <!--计算结果显示主体，使用v-charts-->
-                            <el-col></el-col>
+                            <el-col>
+                                <el-tabs>
+                                    <el-tab-pane label="总资产曲线" lazy>
+                                        <ve-line :data="chartData"></ve-line>
+                                    </el-tab-pane>
+                                    <el-tab-pane label="计算过程一览" lazy>
+                                        <el-table :data="calcResultList" stripe border :height="600">
+                                            <el-table-column label="当年年龄" prop="name"></el-table-column>
+                                            <el-table-column label="年初结余" prop="start"></el-table-column>
+                                            <el-table-column label="理财年化" prop="end"></el-table-column>
+                                            <el-table-column label="理财收入" prop="end"></el-table-column>
+                                            <el-table-column label="收入增长" prop="net"></el-table-column>
+                                            <el-table-column label="年净收入" prop="netRate"></el-table-column>
+                                            <el-table-column label="年末结余" prop="earnRate"></el-table-column>
+                                        </el-table>
+                                    </el-tab-pane>
+                                </el-tabs>
+                            </el-col>
                         </el-row>
                     </el-main>
                 </el-container>
 
             </el-container>
         </el-container>
+
         <!--底边栏-->
-        <el-footer>
-            <el-row>
+        <el-footer class="top-foot-container">
+            <el-row type="flex" justify="center" class="top-foot">
                 <!--版权信息-->
-                <el-col>
-                    <div>@地航者 {{new Date().getFullYear()}}</div>
+                <el-col :span="2">
+                    <div id="right-name">©地航者 {{new Date().getFullYear()}}</div>
                 </el-col>
                 <!--steam-->
-                <el-col>
-                    <el-link href="https://store.steampowered.com/curator/37981326" :underline="false" target="_blank">
-                        <el-image src="../image/steam.png"></el-image>
-                    </el-link>
+                <el-col :span="1" class="foot-img-container">
+                    <a href="https://store.steampowered.com/curator/37981326" target="_blank">
+                        <img src="../image/steam.png" class="foot-img"/>
+                    </a>
                 </el-col>
                 <!--github-->
-                <el-col>
-                    <el-link href="https://github.com/darhao" :underline="false" target="_blank">
-                        <el-image src="../image/github.png"></el-image>
-                    </el-link>
+                <el-col :span="1" class="foot-img-container">
+                    <a href="https://github.com/darhao" target="_blank">
+                        <img src="../image/github.png" class="foot-img"/>
+                    </a>
                 </el-col>
                 <!--打赏-->
-                <el-col>
-                    <el-link :underline="false">
-                       <el-image src="../image/reward.png" @click="onClickReward"></el-image>
-                    <el-link/>
+                <el-col :span="1" class="foot-img-container">
+                    <img src="../image/reward.png" @click="onClickReward" class="foot-img"/>
                 </el-col>
             </el-row>
         </el-footer>
+
     </el-container>
 </div>
 </body>
 <script src="../js/vue-2-6-12.js"></script>
+<script src="../js/vcharts/echarts.min.js"></script>
+<script src="../js/vcharts/numeral.js"></script>
+<script src="../js/vcharts/index.min.js"></script>
 <script src="../js/element-2-15-0.js"></script>
-<script src="../js/app.js"></script>
+<script src="../js/pc.js"></script>
 </html>

@@ -1,0 +1,100 @@
+body{
+    margin: 0;
+}
+
+.top-foot-container{
+    padding: 0;
+    line-height: 60px;
+}
+
+.top-foot{
+    background-color: #409EFF;
+    height: 100%;
+}
+
+#website-name{
+    margin: 0 0 0 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+.user-sign{
+    font-size: 16px;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+#right-name{
+    font-size: 14px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+.foot-img-container{
+    position:relative;
+}
+
+.foot-img{
+    cursor: pointer;
+    width:30px;
+    position: absolute;
+    top: 25%;
+}
+
+.border{
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+    margin: 20px;
+    padding: 14px;
+    border-radius: 4px;
+}
+
+#body-area{
+    height: 817px;
+}
+
+#plan-list{
+    width: 25%;
+    height: 775px;
+}
+
+#main-area{
+    width: 75%;
+    height: 775px;
+}
+
+.list-title{
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #606266;
+}
+
+#plan-details-list{
+    width: 47.5%;
+    height: 715px;
+}
+
+#result-area{
+    width: 52.5%;
+    height: 715px;
+}
+
+.form-attribute{
+    font-size: 14px;
+    color: #606266;
+    text-align: right;
+}
+
+#plan-form{
+    line-height: 60px;
+}
+
+#plan-pager{
+    margin: 20px 0 0 0;
+}
+
+.plan-list-name{
+    color: #409EFF;
+    cursor: pointer;
+}

@@ -31,6 +31,9 @@ public class PlanBody implements Serializable {
     @ApiModelProperty(value = "cpi")
     private Float cpi;
 
+    @ApiModelProperty(value = "初始资产")
+    private Integer init;
+
     @ApiModelProperty(value = "计划阶段条目")
     private List<PlanBodyItem> items;
 
