@@ -9,6 +9,7 @@
 </head>
 <body>
 <div id="app">
+    <!--主界面-->
     <el-container>
 
         <!--顶边栏-->
@@ -35,7 +36,7 @@
             <el-main class="border" id="plan-list">
                 <el-row type="flex" justify="center">
                     <!--列表名-->
-                    <el-col :span="6" class="list-title">我的计划</el-col>
+                    <el-col :span="5" class="list-title">我的计划</el-col>
                     <!--添加按钮-->
                     <el-col :span="2">
                         <el-button type="primary" size="mini" icon="el-icon-plus" circle
@@ -48,7 +49,7 @@
                         <el-table :data="planList" :height="665">
                             <el-table-column label="计划名" width="250">
                                 <template slot-scope="scope">
-                                    <span @click="onClickPlanRow(scope.$index)" class="plan-list-name">
+                                    <span @click="onClickPlanRow(scope.$index)" class="clickable-text">
                                         {{scope.row.name}}
                                     </span>
                                 </template>
@@ -86,30 +87,40 @@
             <el-container class="border" id="main-area">
                 <!--顶边表单-->
                 <el-header>
-                    <el-row id="plan-form" :gutter="20">
+                    <el-row class="line-height-big" :gutter="20">
                         <!--计划名-->
                         <el-col :span="1" class="form-attribute">名称</el-col>
                         <!--计划名输入框-->
                         <el-col :span="4">
-                            <el-input v-model="planName" placeholder="计划名称，长度不超过16"></el-input>
+                            <el-input maxlength="16"
+                                      v-model="planName"
+                                      show-word-limit
+                                      placeholder="长度不超过16个字">
+                            </el-input>
                         </el-col>
                         <!--年龄-->
                         <el-col :span="1" class="form-attribute">年龄</el-col>
                         <!--年龄输入框-->
                         <el-col :span="4">
-                            <el-input v-model="planAge" placeholder="计划开始时年龄(用于显示)"></el-input>
+                            <el-input v-model="planAge" placeholder="计划开始时年龄">
+                                <template slot="append">岁</template>
+                            </el-input>
                         </el-col>
                         <!--cpi-->
                         <el-col :span="1" class="form-attribute">CPI</el-col>
                         <!--cpi输入框-->
                         <el-col :span="4">
-                            <el-input v-model="planCpi" placeholder="年均CPI涨幅，写成小数"></el-input>
+                            <el-input v-model="planCpi" placeholder="年均CPI涨幅">
+                                <template slot="append">%</template>
+                            </el-input>
                         </el-col>
                         <!--初始资产-->
                         <el-col :span="1" class="form-attribute">资产</el-col>
                         <!--初始资产输入框-->
                         <el-col :span="4">
-                            <el-input v-model="planInit" placeholder="现有资产(可负数，单位元)"></el-input>
+                            <el-input v-model="planInit" placeholder="现有资产(可负数)">
+                                <template slot="append">元</template>
+                            </el-input>
                         </el-col>
                         <!--计算按钮-->
                         <el-col :span="2">
@@ -132,43 +143,94 @@
                 <el-container>
                     <!--左侧计划细节列表-->
                     <el-main id="plan-details-list">
-                        <el-row type="flex" justify="center">
-                            <!--列表名-->
-                            <el-col :span="6" class="list-title">计划细节</el-col>
-                            <!--添加按钮-->
-                            <el-col :span="2">
-                                <el-button type="primary"
-                                           icon="el-icon-plus"
-                                           circle
-                                           size="mini"
-                                           @click="onClickPlanDetailsAdd">
-                                </el-button>
-                            </el-col>
-                        </el-row>
-                        <el-row>
-                            <!--列表-->
-                            <el-col>
-                                <el-table :data="planDetailsList"
-                                          @row-click="onClickPlanDetailsRow(row, column, event)" :height="625">
-                                    <el-table-column label="细节名" prop="name"></el-table-column>
-                                    <el-table-column label="起始年" prop="start"></el-table-column>
-                                    <el-table-column label="结束年" prop="end"></el-table-column>
-                                    <el-table-column label="年净收入" prop="net"></el-table-column>
-                                    <el-table-column label="收入增长" prop="netRate"></el-table-column>
-                                    <el-table-column label="理财年化" prop="earnRate"></el-table-column>
-                                    <el-table-column label="操作">
-                                        <template slot-scope="scope">
-                                            <el-button size="mini"
-                                                       icon="el-icon-delete"
-                                                       circle
-                                                       type="danger"
-                                                       @click="onClickPlanDetailsDelete(scope.$index)">
-                                            </el-button>
-                                        </template>
-                                    </el-table-column>
-                                </el-table>
-                            </el-col>
-                        </el-row>
+                        <!--上部现金流管理-->
+                        <div id="cf-list">
+                            <el-row type="flex" justify="center">
+                                <!--列表名-->
+                                <el-col :span="3" class="list-title">现金流</el-col>
+                                <!--添加按钮-->
+                                <el-col :span="2">
+                                    <el-button type="primary"
+                                               icon="el-icon-plus"
+                                               circle
+                                               size="mini"
+                                               @click="onClickCfAdd">
+                                    </el-button>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <!--列表-->
+                                <el-col>
+                                    <el-table :data="cfList" :height="275">
+                                        <el-table-column label="名称">
+                                            <template slot-scope="scope">
+                                                <span @click="onClickCfRow(scope.$index)" class="clickable-text">
+                                                    {{scope.row.name}}
+                                                </span>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="起始年" prop="start"></el-table-column>
+                                        <el-table-column label="结束年" prop="end"></el-table-column>
+                                        <el-table-column label="年净收入" prop="net"></el-table-column>
+                                        <el-table-column label="年入增长" prop="rate"></el-table-column>
+                                        <el-table-column label="操作">
+                                            <template slot-scope="scope">
+                                                <el-button size="mini"
+                                                           icon="el-icon-delete"
+                                                           circle
+                                                           type="danger"
+                                                           @click="onClickCfDelete(scope.$index)">
+                                                </el-button>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-col>
+                            </el-row>
+                        </div>
+                        <!--下部理财管理-->
+                        <div id="mp-list">
+                            <el-row type="flex" justify="center">
+                                <!--列表名-->
+                                <el-col :span="2" class="list-title">理财</el-col>
+                                <!--添加按钮-->
+                                <el-col :span="2">
+                                    <el-button type="primary"
+                                               icon="el-icon-plus"
+                                               circle
+                                               size="mini"
+                                               @click="onClickMpAdd">
+                                    </el-button>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <!--列表-->
+                                <el-col>
+                                    <el-table :data="mpList" :height="300">
+                                        <el-table-column label="名称">
+                                            <template slot-scope="scope">
+                                                <span @click="onClickMpRow(scope.$index)" class="clickable-text">
+                                                    {{scope.row.name}}
+                                                </span>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="起始年" prop="start"></el-table-column>
+                                        <el-table-column label="结束年" prop="end"></el-table-column>
+                                        <el-table-column label="理财年化" prop="rate"></el-table-column>
+                                        <el-table-column label="仓位占比" prop="proportion"></el-table-column>
+                                        <el-table-column label="操作">
+                                            <template slot-scope="scope">
+                                                <el-button size="mini"
+                                                           icon="el-icon-delete"
+                                                           circle
+                                                           type="danger"
+                                                           @click="onClickMpDelete(scope.$index)">
+                                                </el-button>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-col>
+                            </el-row>
+                        </div>
                     </el-main>
                     <!--右侧计算结果-->
                     <el-main id="result-area">
@@ -178,16 +240,19 @@
                                 <el-tabs>
                                     <el-tab-pane label="总资产曲线" lazy>
                                         <ve-line :data="chartData"></ve-line>
+                                        <div>
+                                            此处灰字框框展示大体计算过程
+                                        </div>
                                     </el-tab-pane>
                                     <el-tab-pane label="计算过程一览" lazy>
                                         <el-table :data="calcResultList" stripe border :height="600">
-                                            <el-table-column label="当年年龄" prop="name"></el-table-column>
-                                            <el-table-column label="年初结余" prop="start"></el-table-column>
-                                            <el-table-column label="理财年化" prop="end"></el-table-column>
-                                            <el-table-column label="理财收入" prop="end"></el-table-column>
-                                            <el-table-column label="收入增长" prop="net"></el-table-column>
-                                            <el-table-column label="年净收入" prop="netRate"></el-table-column>
-                                            <el-table-column label="年末结余" prop="earnRate"></el-table-column>
+                                            <el-table-column label="年份编号" prop="year"></el-table-column>
+                                            <el-table-column label="当年年龄" prop="age"></el-table-column>
+                                            <el-table-column label="年初结余" prop="init"></el-table-column>
+                                            <el-table-column label="总理财年化" prop="earnRate"></el-table-column>
+                                            <el-table-column label="总理财收入" prop="earn"></el-table-column>
+                                            <el-table-column label="总年净收入" prop="net"></el-table-column>
+                                            <el-table-column label="年末结余" prop="balance"></el-table-column>
                                         </el-table>
                                     </el-tab-pane>
                                 </el-tabs>
@@ -195,7 +260,6 @@
                         </el-row>
                     </el-main>
                 </el-container>
-
             </el-container>
         </el-container>
 
@@ -226,6 +290,236 @@
         </el-footer>
 
     </el-container>
+
+    <!--登录框-->
+    <el-dialog
+            title="登录"
+            :close-on-click-modal="false"
+            :visible.sync="signInDialogVisible"
+            @closed="onCloseSignInDialog"
+            width="20%">
+        <el-row class="line-height-big">
+            <el-col :span="4" class="form-attribute">用户</el-col>
+            <el-col :span="20">
+                <el-input maxlength="16"
+                          v-model="signInUserName"
+                          show-word-limit
+                          placeholder="长度不超过16个字">
+                </el-input>
+            </el-col>
+        </el-row>
+        <el-row class="line-height-big">
+            <el-col :span="4" class="form-attribute">密码</el-col>
+            <el-col :span="20">
+                <el-input maxlength="16"
+                          v-model="signInPassword"
+                          show-password
+                          placeholder="长度为6-16个字">
+                </el-input>
+            </el-col>
+        </el-row>
+        <el-row class="line-height-small margin-left-right">
+            <el-checkbox v-model="signInRemember7Days">保持登录7天</el-checkbox>
+        </el-row>
+        <el-row class="line-height-small margin-left-right">
+            <el-col :span="20">
+                <span class="clickable-text el-icon-paperclip" @click="onClickSignUpFromSignIn">
+                    注册
+                </span>
+            </el-col>
+            <el-col :span="4">
+                <el-button type="primary" @click="postUserSignIn">登录</el-button>
+            </el-col>
+        </el-row>
+    </el-dialog>
+
+    <!--注册框-->
+    <el-dialog
+            title="注册"
+            :close-on-click-modal="false"
+            :visible.sync="signUpDialogVisible"
+            @closed="onCloseSignUpDialog"
+            width="20%">
+        <el-row class="line-height-big">
+            <el-col :span="4" class="form-attribute">用户</el-col>
+            <el-col :span="20">
+                <el-input maxlength="16"
+                          v-model="signUpUserName"
+                          show-word-limit
+                          placeholder="长度不超过16个字">
+                </el-input>
+            </el-col>
+        </el-row>
+        <el-row class="line-height-big">
+            <el-col :span="4" class="form-attribute">密码</el-col>
+            <el-col :span="20">
+                <el-input maxlength="16"
+                          v-model="signUpPassword"
+                          show-password
+                          placeholder="长度为6-16个字">
+                </el-input>
+            </el-col>
+        </el-row>
+        <el-row class="line-height-big">
+            <el-col :span="6" class="form-attribute">确认密码</el-col>
+            <el-col :span="18">
+                <el-input v-model="signUpPasswordConfirm"
+                          maxlength="16"
+                          show-password
+                          placeholder="与密码一致">
+                </el-input>
+            </el-col>
+        </el-row>
+        <el-row class="line-height-small margin-left-right">
+            <el-col :span="20">
+                <span class="clickable-text el-icon-key" @click="onClickSignInFromSignUp">
+                    登录
+                </span>
+            </el-col>
+            <el-col :span="4">
+                <el-button type="primary" @click="postUserSignUp">注册</el-button>
+            </el-col>
+        </el-row>
+    </el-dialog>
+
+    <!--现金流框-->
+    <el-dialog
+            title="现金流"
+            :close-on-click-modal="false"
+            :visible.sync="cfDialogVisible"
+            @closed="onCloseCfDialog"
+            width="20%">
+        <el-form>
+            <el-form-item label="名称">
+                <el-input maxlength="16" v-model="cfName" show-word-limit></el-input>
+            </el-form-item>
+            <el-tooltip placement="left">
+                <div slot="content">
+                    因一个计划中，多个细节会叠加到计算结果中,<br/>
+                    所以在此可设置某一细节的生效时间范围，<br/>
+                    包含起始年，但不包含结束年。<br/><br/>
+                    例如：某一个计划内有两个细节a和b，<br/>
+                    a生效时间为第1年到第5年，b为第3年到第7年，<br/>
+                    则在计算结果中的第3、4年（共2年）将受这两个细节叠加影响，<br/>
+                    而第1、2年则受a影响，第
+                </div>
+                <el-form-item>
+                    <el-row type="flex" justfiy="space-around">
+                        <el-col :span="4" class="margin-right">起始年</el-col>
+                        <el-col :span="8" class="margin-right">
+                            <el-input v-model="cfStart"></el-input>
+                        </el-col>
+                        <el-col :span="4" class="margin-right">结束年</el-col>
+                        <el-col :span="8" class="margin-right">
+                            <el-input v-model="cfEnd"></el-input>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
+            </el-tooltip>
+            <el-tooltip placement="left">
+                <div slot="content">
+                    在此可设置该细节生效时间范围内的年净收入,<br/>
+                    年净收入就是指收入减去支出，可以为负数，<br/>
+                    特别注意，这里不要算入你理财的盈亏，<br/>
+                    请输入整数，这里的单位为元。<br/><br/>
+                    例如：引用上一个输入框中的例子，<br/>
+                    细节a的年净收入是100,000；b是-10,000，<br/>
+                    则在计算结果中的第4、5、6、7、8、9年（共6年），<br/>
+                </div>
+                <el-form-item label="年净收入">
+                    <el-input v-model="cfNet">
+                        <template slot="append">元</template>
+                    </el-input>
+                </el-form-item>
+            </el-tooltip>
+            <el-tooltip placement="left">
+                <div slot="content">
+                    待定
+                </div>
+                <el-form-item>
+                    <el-col :span="4">年入增长</el-col>
+                    <el-col :span="8" class="margin-left-right">
+                        <el-input v-model="cfRate" :disabled="cfDialogUseCpi">
+                            <template slot="append">%</template>
+                        </el-input>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-switch v-model="cfDialogUseCpi" active-text="引用CPI"></el-switch>
+                    </el-col>
+                </el-form-item>
+            </el-tooltip>
+            <el-form-item>
+                <el-button type="primary" @click="onClickCfSave">保存</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+
+
+    <!--理财框-->
+    <el-dialog
+            title="理财"
+            :close-on-click-modal="false"
+            :visible.sync="mpDialogVisible"
+            @closed="onCloseMpDialog"
+            width="20%">
+        <el-form>
+            <el-form-item label="名称">
+                <el-input maxlength="16" v-model="mpName" show-word-limit></el-input>
+            </el-form-item>
+            <el-tooltip placement="left">
+                <div slot="content">
+                    因一个计划中，多个细节会叠加到计算结果中,<br/>
+                    所以在此可设置某一细节的生效时间范围，<br/>
+                    包含起始年，但不包含结束年。<br/><br/>
+                    例如：某一个计划内有两个细节a和b，<br/>
+                    a生效时间为第1年到第5年，b为第3年到第7年，<br/>
+                    则在计算结果中的第3、4年（共2年）将受这两个细节叠加影响，<br/>
+                    而第1、2年则受a影响，第
+                </div>
+                <el-form-item>
+                    <el-row type="flex" justfiy="space-around">
+                        <el-col :span="4" class="margin-right">起始年</el-col>
+                        <el-col :span="8" class="margin-right">
+                            <el-input v-model="mpStart"></el-input>
+                        </el-col>
+                        <el-col :span="4" class="margin-right">结束年</el-col>
+                        <el-col :span="8" class="margin-right">
+                            <el-input v-model="mpEnd"></el-input>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
+            </el-tooltip>
+            <el-tooltip placement="left">
+                <div slot="content">
+                    在此可设置该细节生效时间范围内的年净收入,<br/>
+                    年净收入就是指收入减去支出，可以为负数，<br/>
+                    特别注意，这里不要算入你理财的盈亏，<br/>
+                    请输入整数，这里的单位为元。<br/><br/>
+                    例如：引用上一个输入框中的例子，<br/>
+                    细节a的年净收入是100,000；b是-10,000，<br/>
+                    则在计算结果中的第4、5、6、7、8、9年（共6年），<br/>
+                </div>
+                <el-form-item label="仓位占比">
+                    <el-input v-model="mpProportion">
+                        <template slot="append">%</template>
+                    </el-input>
+                </el-form-item>
+            </el-tooltip>
+            <el-tooltip placement="left">
+                <div slot="content">
+                    待定
+                </div>
+                <el-form-item label="理财年化">
+                    <el-input v-model="mpRate">
+                        <template slot="append">%</template>
+                    </el-input>
+                </el-form-item>
+            </el-tooltip>
+            <el-form-item>
+                <el-button type="primary" @click="onClickMpSave">保存</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
 </div>
 </body>
 <script src="../js/vue-2-6-12.js"></script>

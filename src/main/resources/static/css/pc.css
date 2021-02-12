@@ -83,18 +83,42 @@ body{
 .form-attribute{
     font-size: 14px;
     color: #606266;
-    text-align: right;
+    text-align: center;
 }
 
-#plan-form{
-    line-height: 60px;
+.line-height-big{
+    line-height: 50px;
+}
+
+.line-height-small{
+    line-height: 40px;
 }
 
 #plan-pager{
     margin: 20px 0 0 0;
 }
 
-.plan-list-name{
+.clickable-text{
     color: #409EFF;
     cursor: pointer;
+}
+
+.margin-left-right{
+    margin: 0 20px;
+}
+
+.text-center{
+    text-align: center;
+}
+
+.margin-right{
+    margin: 0 20px 0 0;
+}
+
+#mp-list{
+    height: 325px;
+}
+
+#cf-list{
+    height: 325px;
 }
