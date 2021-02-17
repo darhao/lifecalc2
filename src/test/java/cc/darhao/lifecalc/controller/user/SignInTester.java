@@ -2,6 +2,7 @@ package cc.darhao.lifecalc.controller.user;
 
 import cc.darhao.lifecalc.dao.UserMapper;
 import cc.darhao.lifecalc.entity.User;
+import cc.darhao.lifecalc.entity.vo.SignInVo;
 import cc.darhao.lifecalc.interceptor.AccessInterceptor;
 import cc.darhao.lifecalc.util.ResultFactory;
 import com.alibaba.fastjson.JSON;
@@ -42,9 +43,9 @@ class SignInTester {
         password = "123456";
         User user = new User().setName(name).setPassword(password).setSignUpTime(new Date()).setSignInTime(new Date());
         userMapper.insert(user);
-        ResultFactory.Result result = request();
+        ResultFactory.Result<SignInVo> result = request();
         Assertions.assertEquals(ResultFactory.SUCCESS_CODE ,result.getCode());
-        String userId = redisTemplate.opsForValue().get(AccessInterceptor.LIFECALC_USER_TOKEN + result.getData());
+        String userId = redisTemplate.opsForValue().get(AccessInterceptor.LIFECALC_USER_TOKEN + result.getData().getToken());
         Assertions.assertEquals(
                 Integer.valueOf(userId),
                 userMapper.selectOne(new QueryWrapper<User>().eq("name", name).eq("password", password)).getId());
@@ -55,21 +56,32 @@ class SignInTester {
     public void 错误测试() throws Exception {
         name = "test";
         password = "123456";
-        ResultFactory.Result result = request();
+        ResultFactory.Result<SignInVo> result = requestString();
         Assertions.assertEquals(ResultFactory.OPERATION_EXCEPTION_CODE ,result.getCode());
     }
 
 
     private ResultFactory.Result request() throws Exception {
-        String json = mockMvc.perform(MockMvcRequestBuilders.post("/user/signIn")
+        String json = getResult();
+        //泛型反序列化
+        return JSON.parseObject(json, new TypeReference<ResultFactory.Result<SignInVo>>(){});
+    }
+
+
+    private ResultFactory.Result requestString() throws Exception {
+        String json = getResult();
+        //泛型反序列化
+        return JSON.parseObject(json, new TypeReference<ResultFactory.Result<String>>(){});
+    }
+
+    private String getResult() throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders.post("/user/signIn")
                 .param("name", name)
                 .param("password", password)
                 .header("accept", "application/json;charset=UTF-8"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn().getResponse().getContentAsString();
-        //泛型反序列化
-        return JSON.parseObject(json, new TypeReference<ResultFactory.Result<String>>(){});
     }
 
 

@@ -96,10 +96,10 @@ public class PlanController {
     }
 
 
-    @ApiOperation(value = "增加计划", notes = "为用户保存计划")
+    @ApiOperation(value = "增加计划", notes = "为用户保存计划，成功会返回实体id")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", paramType = "query", required = true),
-            @ApiImplicitParam(name = "name", value = "计划名，不超过64个字符", paramType = "query"),
+            @ApiImplicitParam(name = "name", value = "计划名，不超过64个字符", paramType = "query", required = true),
             @ApiImplicitParam(name = "planJson", value = "计划内容，格式为json，参考PlanBody模型", paramType = "query", required = true)
     })
     @PostMapping("/add")
@@ -121,7 +121,7 @@ public class PlanController {
         Plan plan = new Plan().setUser(Integer.valueOf(userId)).setName(name==null?"未命名计划":name).
                 setBody(planJson).setCreateTime(new Date());
         planMapper.insert(plan);
-        return ResultFactory.succeed();
+        return ResultFactory.succeed(plan.getId());
     }
 
 

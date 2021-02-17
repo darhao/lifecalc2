@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/pc.css">
 </head>
 <body>
-<div id="app">
+<div id="app" v-loading.fullscreen.lock="loading">
     <!--主界面-->
     <el-container>
 
@@ -16,16 +16,22 @@
         <el-header class="top-foot-container">
             <el-row class="top-foot">
                 <!--网站名-->
-                <el-col :span="22">
-                    <i id="website-name" class="el-icon-s-flag">&nbsp;&nbsp;平凡的人生计算器</i>
+                <el-col :span="userInfo === null ? 22 : 20">
+                    <i id="website-name" class="el-icon-s-flag" @click="onClickReward">&nbsp;&nbsp;平凡的人生计算器&nbsp;2.0</i>
                 </el-col>
                 <!--注册按钮-->
-                <el-col :span="1">
+                <el-col :span="1" v-if="userInfo === null">
                     <i class="el-icon-paperclip user-sign" @click="onClickSignUp">注册</i>
                 </el-col>
                 <!--登录按钮-->
-                <el-col :span="1">
+                <el-col :span="1" v-if="userInfo === null">
                     <i class="el-icon-key user-sign" @click="onClickSignIn">登录</i>
+                </el-col>
+                <!--用户名&登出按钮-->
+                <el-col :span="4" v-if="userInfo != null" id="user-name">
+                    <el-popconfirm title="退出当前账号？" @confirm="onClickSignOut">
+                        <i class="el-icon-user user-sign" slot="reference">&nbsp;{{userInfo.name}}</i>
+                    </el-popconfirm>
                 </el-col>
             </el-row>
         </el-header>
@@ -33,7 +39,7 @@
         <!--主体-->
         <el-container id="body-area">
             <!--左侧计划列表-->
-            <el-main class="border" id="plan-list">
+            <el-main class="border" id="plan-list" v-if="userInfo != null">
                 <el-row type="flex" justify="center">
                     <!--列表名-->
                     <el-col :span="5" class="list-title">我的计划</el-col>
@@ -49,12 +55,12 @@
                         <el-table :data="planList" :height="665">
                             <el-table-column label="计划名" width="250">
                                 <template slot-scope="scope">
-                                    <span @click="onClickPlanRow(scope.$index)" class="clickable-text">
-                                        {{scope.row.name}}
-                                    </span>
+                                        <span @click="onClickPlanRow(scope.$index)" class="clickable-text">
+                                            {{scope.row.name}}
+                                        </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="修改日期" prop="date" width="100"></el-table-column>
+                            <el-table-column label="修改日期" prop="updateTime" width="100"></el-table-column>
                             <el-table-column label="操作" width="50">
                                 <template slot-scope="scope">
                                     <el-button size="mini"
@@ -78,10 +84,14 @@
                                 :page-count="planTotalPage"
                                 :current-page="planCurrentPage"
                                 :pager-count="5"
-                                @current-change="onPagePlan(pageNo)">
+                                @current-change="postPagePlan">
                         </el-pagination>
                     </el-col>
                 </el-row>
+            </el-main>
+            <!--左侧计划列表（未登录时遮罩）-->
+            <el-main class="border" id="no-sign-in-mask" v-if="userInfo === null">
+                点击此处<span class="clickable-text" @click="onClickSignIn">登录</span>，管理你的计划吧！
             </el-main>
             <!--右侧计划详情-->
             <el-container class="border" id="main-area">
@@ -164,22 +174,27 @@
                                     <el-table :data="cfList" :height="275">
                                         <el-table-column label="名称">
                                             <template slot-scope="scope">
-                                                <span @click="onClickCfRow(scope.$index)" class="clickable-text">
-                                                    {{scope.row.name}}
-                                                </span>
+                                                    <span @click="onClickCfRow(scope.$index)" class="clickable-text">
+                                                        {{scope.row.name}}
+                                                    </span>
                                             </template>
                                         </el-table-column>
                                         <el-table-column label="起始年" prop="start"></el-table-column>
                                         <el-table-column label="结束年" prop="end"></el-table-column>
                                         <el-table-column label="年净收入" prop="net"></el-table-column>
-                                        <el-table-column label="年入增长" prop="rate"></el-table-column>
+                                        <el-table-column label="年入增长">
+                                            <template slot-scope="scope">
+                                                <span v-if="isNaN(scope.row.rate)">{{scope.row.netRate}}</span>
+                                                <span v-if="!isNaN(scope.row.rate)">{{scope.row.netRate}}%</span>
+                                            </template>
+                                        </el-table-column>
                                         <el-table-column label="操作">
                                             <template slot-scope="scope">
                                                 <el-button size="mini"
-                                                           icon="el-icon-delete"
-                                                           circle
-                                                           type="danger"
-                                                           @click="onClickCfDelete(scope.$index)">
+                                                       icon="el-icon-delete"
+                                                       circle
+                                                       type="danger"
+                                                       @click="onClickCfDelete(scope.$index)">
                                                 </el-button>
                                             </template>
                                         </el-table-column>
@@ -208,15 +223,23 @@
                                     <el-table :data="mpList" :height="300">
                                         <el-table-column label="名称">
                                             <template slot-scope="scope">
-                                                <span @click="onClickMpRow(scope.$index)" class="clickable-text">
-                                                    {{scope.row.name}}
-                                                </span>
+                                                    <span @click="onClickMpRow(scope.$index)" class="clickable-text">
+                                                        {{scope.row.name}}
+                                                    </span>
                                             </template>
                                         </el-table-column>
                                         <el-table-column label="起始年" prop="start"></el-table-column>
                                         <el-table-column label="结束年" prop="end"></el-table-column>
-                                        <el-table-column label="理财年化" prop="rate"></el-table-column>
-                                        <el-table-column label="仓位占比" prop="proportion"></el-table-column>
+                                        <el-table-column label="理财年化">
+                                            <template slot-scope="scope">
+                                                <span>{{scope.row.earnRate}}%</span>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="仓位占比">
+                                            <template slot-scope="scope">
+                                                <span>{{scope.row.earnProportion}}%</span>
+                                            </template>
+                                        </el-table-column>
                                         <el-table-column label="操作">
                                             <template slot-scope="scope">
                                                 <el-button size="mini"
@@ -241,7 +264,7 @@
                                     <el-tab-pane label="总资产曲线" lazy>
                                         <ve-line :data="chartData"></ve-line>
                                         <div>
-                                            此处灰字框框展示大体计算过程
+                                            此处灰字框框展示大体计算过程，右下角添加旧版的入口
                                         </div>
                                     </el-tab-pane>
                                     <el-tab-pane label="计算过程一览" lazy>
@@ -318,7 +341,7 @@
                 </el-input>
             </el-col>
         </el-row>
-        <el-row class="line-height-small margin-left-right">
+        <el-row class="line-height-small margin-left">
             <el-checkbox v-model="signInRemember7Days">保持登录7天</el-checkbox>
         </el-row>
         <el-row class="line-height-small margin-left-right">
@@ -370,14 +393,17 @@
                 </el-input>
             </el-col>
         </el-row>
+        <el-row class="line-height-small margin-left">
+            <el-checkbox v-model="signInRemember7Days">保持登录7天</el-checkbox>
+        </el-row>
         <el-row class="line-height-small margin-left-right">
-            <el-col :span="20">
+            <el-col :span="16">
                 <span class="clickable-text el-icon-key" @click="onClickSignInFromSignUp">
                     登录
                 </span>
             </el-col>
-            <el-col :span="4">
-                <el-button type="primary" @click="postUserSignUp">注册</el-button>
+            <el-col :span="8">
+                <el-button type="primary" @click="postUserSignUp">注册并登录</el-button>
             </el-col>
         </el-row>
     </el-dialog>
@@ -454,7 +480,6 @@
         </el-form>
     </el-dialog>
 
-
     <!--理财框-->
     <el-dialog
             title="理财"
@@ -527,5 +552,6 @@
 <script src="../js/vcharts/numeral.js"></script>
 <script src="../js/vcharts/index.min.js"></script>
 <script src="../js/element-2-15-0.js"></script>
+<script src="../js/axios.min.js"></script>
 <script src="../js/pc.js"></script>
 </html>

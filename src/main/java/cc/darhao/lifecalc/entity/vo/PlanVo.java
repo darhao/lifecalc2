@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.text.SimpleDateFormat;
 
 /**
  * <p>
@@ -38,10 +38,10 @@ public class PlanVo implements Serializable {
     private String name;
 
     @ApiModelProperty(value = "创建时间")
-    private Date createTime;
+    private String createTime;
 
     @ApiModelProperty(value = "更新时间")
-    private Date updateTime;
+    private String updateTime;
 
     @ApiModelProperty(value = "计划内容")
     private PlanBody body;
@@ -50,9 +50,8 @@ public class PlanVo implements Serializable {
     public PlanVo(Plan plan){
         this.id = plan.getId();
         this.name = plan.getName();
-        this.createTime = plan.getCreateTime();
-        this.updateTime = plan.getUpdateTime();
+        this.createTime = new SimpleDateFormat("yyyy-MM-dd").format(plan.getCreateTime());
+        this.updateTime = new SimpleDateFormat("yyyy-MM-dd").format(plan.getUpdateTime());
         this.body = JSON.parseObject(plan.getBody(), PlanBody.class);
     }
-
 }

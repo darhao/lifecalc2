@@ -17,12 +17,18 @@ body{
     font-size: 20px;
     font-weight: bold;
     color: #FFFFFF;
+    cursor: pointer;
 }
 
 .user-sign{
     font-size: 16px;
     color: #FFFFFF;
     cursor: pointer;
+}
+
+#user-name{
+    text-align: right;
+    padding: 0 20px 0 0;
 }
 
 #right-name{
@@ -111,8 +117,16 @@ body{
     text-align: center;
 }
 
+.text-right{
+    text-align: right;
+}
+
 .margin-right{
     margin: 0 20px 0 0;
+}
+
+.margin-left{
+    margin: 0 0 0 15px;
 }
 
 #mp-list{
@@ -121,4 +135,13 @@ body{
 
 #cf-list{
     height: 325px;
+}
+
+#no-sign-in-mask{
+    text-align:center;
+    color: #606266;
+    font-size: 16px;
+    line-height: 725px;
+    width: 25%;
+    height: 775px;
 }

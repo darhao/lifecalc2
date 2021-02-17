@@ -37,12 +37,12 @@ public class PlanBodyItem implements Serializable {
     private Integer net;
 
     @ApiModelProperty(value = "年净收入增长率")
-    private Float netRate;
+    private Object netRate;
 
     @ApiModelProperty(value = "理财年化收益率（与net、netRate不能同时有值）")
-    private Float earnRate;
+    private Integer earnRate;
 
     @ApiModelProperty(value = "多少比例总资产用于该理财策略（与net、netRate不能同时有值）")
-    private Float earnProportion;
+    private Integer earnProportion;
 
 }

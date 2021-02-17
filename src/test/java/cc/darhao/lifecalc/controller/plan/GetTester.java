@@ -133,9 +133,9 @@ class GetTester {
         for (int i = 0; i < 5; i++){
             PlanBody body = new PlanBody();
             List<PlanBodyItem> items = new LinkedList<>();
-            items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setNetRate(0.2f).setEarnRate(0.2f));
-            items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setNetRate(0.1f).setEarnRate(0.2f));
-            body.setAge(20).setCpi(0.03f).setItems(items);
+            items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setNetRate(2).setEarnRate(2));
+            items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setNetRate(1).setEarnRate(2));
+            body.setAge(20).setCpi(3).setItems(items);
             Plan plan = new Plan();
             plan.setCreateTime(new Date()).setUpdateTime(new Date()).setName("test-plan")
                     .setUser(user1Id).setBody(JSON.toJSONString(body));
@@ -145,9 +145,9 @@ class GetTester {
         for (int i = 0; i < 5; i++){
             PlanBody body = new PlanBody();
             List<PlanBodyItem> items = new LinkedList<>();
-            items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setNetRate(0.2f).setEarnRate(0.2f));
-            items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setNetRate(0.1f).setEarnRate(0.2f));
-            body.setAge(20).setCpi(0.03f).setItems(items);
+            items.add(new PlanBodyItem().setName("工作阶段").setStart(1).setEnd(10).setNet(100000).setNetRate(2).setEarnRate(2));
+            items.add(new PlanBodyItem().setName("自由阶段").setStart(11).setEnd(60).setNet(0).setNetRate(1).setEarnRate(2));
+            body.setAge(20).setCpi(3).setItems(items);
             Plan plan = new Plan();
             plan.setCreateTime(new Date()).setUpdateTime(new Date()).setName("test-plan")
                     .setUser(user2Id).setBody(JSON.toJSONString(body));

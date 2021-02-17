@@ -4,6 +4,7 @@ package cc.darhao.lifecalc.controller;
 import cc.darhao.lifecalc.annotation.Log;
 import cc.darhao.lifecalc.dao.UserMapper;
 import cc.darhao.lifecalc.entity.User;
+import cc.darhao.lifecalc.entity.vo.SignInVo;
 import cc.darhao.lifecalc.interceptor.AccessInterceptor;
 import cc.darhao.lifecalc.util.ResultFactory;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -56,7 +57,7 @@ public class UserController {
             @Length(max = 16, message = "用户名长度不能超过16个字符")
             String name,
             @NotBlank(message = "密码不能为空")
-            @Length(min = 6, max = 16, message = "密码长度不能超过16个字符")
+            @Length(min = 6, max = 16, message = "密码长度不能小于6个字符或超过16个字符")
             String password) {
         Integer count = userMapper.selectCount(new QueryWrapper<User>().eq("name", name));
         if(count.intValue() != 0){
@@ -80,7 +81,7 @@ public class UserController {
             @Length(max = 16, message = "用户名长度不能超过16个字符")
             String name,
             @NotBlank(message = "密码不能为空")
-            @Length(min = 6, max = 16, message = "密码长度不能超过16个字符")
+            @Length(min = 6, max = 16, message = "密码长度不能小于6个字符或超过16个字符")
             String password) {
         User user = userMapper.selectOne(new QueryWrapper<User>().eq("name", name).eq("password",password));
         if(user == null){
@@ -90,10 +91,21 @@ public class UserController {
         userMapper.updateById(user);
         String uuid = UUID.randomUUID().toString();
         redisTemplate.opsForValue().set(AccessInterceptor.LIFECALC_USER_TOKEN + uuid, user.getId().toString(), 7, TimeUnit.DAYS);
-        return ResultFactory.succeed(uuid);
+        SignInVo signInVo = new SignInVo().setToken(uuid).setName(name);
+        return ResultFactory.succeed(signInVo);
     }
 
 
+    @ApiOperation(value = "登出", notes = "登出用户")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", paramType = "query", required = true),
+    })
+    @PostMapping("/signOut")
+    @Log("登出")
+    public ResultFactory.Result<String> signOut(String token) {
+        redisTemplate.delete(AccessInterceptor.LIFECALC_USER_TOKEN + token);
+        return ResultFactory.succeed();
+    }
 
 }
 

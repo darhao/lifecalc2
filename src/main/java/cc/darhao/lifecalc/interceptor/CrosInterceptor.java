@@ -15,8 +15,8 @@ public class CrosInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        response.addHeader("Access-Control-Allow-Origin", "*");
-        return true;
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		return true;
     }
 
 }
