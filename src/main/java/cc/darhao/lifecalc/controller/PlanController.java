@@ -119,7 +119,7 @@ public class PlanController {
             throw new ValidationException("Json格式错误");
         }
         Plan plan = new Plan().setUser(Integer.valueOf(userId)).setName(name==null?"未命名计划":name).
-                setBody(planJson).setCreateTime(new Date());
+                setBody(planJson).setCreateTime(new Date()).setUpdateTime(new Date());
         planMapper.insert(plan);
         return ResultFactory.succeed(plan.getId());
     }
@@ -169,6 +169,28 @@ public class PlanController {
             Integer planId) {
         String userId = redisTemplate.opsForValue().get(AccessInterceptor.LIFECALC_USER_TOKEN + token);
         planMapper.delete(new QueryWrapper<Plan>().eq("id", planId).eq("user", userId));
+        return ResultFactory.succeed();
+    }
+
+
+    @ApiOperation(value = "复制计划", notes = "根据计划，复制一个计划")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", paramType = "query", required = true),
+            @ApiImplicitParam(name = "planId", value = "计划ID", paramType = "query", required = true)
+    })
+    @PostMapping("/copy")
+    @Log("复制一个计划")
+    public ResultFactory.Result<String> copy(
+            String token,
+            @NotNull(message = "id不能为空")
+            Integer planId) {
+        String userId = redisTemplate.opsForValue().get(AccessInterceptor.LIFECALC_USER_TOKEN + token);
+        Plan plan = planMapper.selectOne(new QueryWrapper<Plan>().eq("id", planId).eq("user", userId));
+        if (plan == null) {
+            return ResultFactory.failed(ResultFactory.PARAMETER_EXCEPTION_CODE,"该用户没有该计划");
+        }
+        plan.setId(null);
+        planMapper.insert(plan);
         return ResultFactory.succeed();
     }
 

@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="../css/pc.css">
 </head>
 <body>
+<!--vue loading-->
+<div id="appLoading"><span>加载中...</span></div>
+
 <div id="app" v-loading.fullscreen.lock="loading">
     <!--主界面-->
     <el-container>
@@ -53,7 +56,7 @@
                     <!--计划列表，使用element的table组件-->
                     <el-col>
                         <el-table :data="planList" :height="665">
-                            <el-table-column label="计划名" width="250">
+                            <el-table-column label="计划名" width="200">
                                 <template slot-scope="scope">
                                         <span @click="onClickPlanRow(scope.$index)" class="clickable-text">
                                             {{scope.row.name}}
@@ -61,13 +64,19 @@
                                 </template>
                             </el-table-column>
                             <el-table-column label="修改日期" prop="updateTime" width="100"></el-table-column>
-                            <el-table-column label="操作" width="50">
+                            <el-table-column label="操作" width="100">
                                 <template slot-scope="scope">
                                     <el-button size="mini"
                                                icon="el-icon-delete"
                                                circle
                                                type="danger"
                                                @click="onClickPlanDelete(scope.$index)">
+                                    </el-button>
+                                    <el-button size="mini"
+                                               icon="el-icon-document-copy"
+                                               circle
+                                               type="success"
+                                               @click="onClickPlanCopy(scope.$index)">
                                     </el-button>
                                 </template>
                             </el-table-column>
@@ -262,10 +271,12 @@
                             <el-col>
                                 <el-tabs>
                                     <el-tab-pane label="总资产曲线" lazy>
-                                        <ve-line :data="chartData"></ve-line>
-                                        <div>
-                                            此处灰字框框展示大体计算过程，右下角添加旧版的入口
-                                        </div>
+                                        <ve-line :data="chartData" :settings="chartSettings"></ve-line>
+                                        <a href="http://darhao.cc:8888/life/" target="_blank">
+                                            <el-button id="old-enter" type="success" plain class="el-icon-ship">
+                                                旧版入口
+                                            </el-button>
+                                        </a>
                                     </el-tab-pane>
                                     <el-tab-pane label="计算过程一览" lazy>
                                         <el-table :data="calcResultList" stripe border :height="600">
@@ -419,15 +430,15 @@
             <el-form-item label="名称">
                 <el-input maxlength="16" v-model="cfName" show-word-limit></el-input>
             </el-form-item>
-            <el-tooltip placement="left">
+            <el-tooltip placement="left" :open-delay="500">
                 <div slot="content">
-                    因一个计划中，多个细节会叠加到计算结果中,<br/>
-                    所以在此可设置某一细节的生效时间范围，<br/>
+                    多个现金流会叠加,<br/>
+                    所以在此可设置某一现金流的生效时间范围，<br/>
                     包含起始年，但不包含结束年。<br/><br/>
-                    例如：某一个计划内有两个细节a和b，<br/>
+                    例如：某一个计划内有两个现金流a和b，<br/>
                     a生效时间为第1年到第5年，b为第3年到第7年，<br/>
-                    则在计算结果中的第3、4年（共2年）将受这两个细节叠加影响，<br/>
-                    而第1、2年则受a影响，第
+                    则在计算结果中的第3、4年将受这两个现金流叠加影响，<br/>
+                    而第1、2年则受a影响，第5、6年受b影响
                 </div>
                 <el-form-item>
                     <el-row type="flex" justfiy="space-around">
@@ -442,15 +453,14 @@
                     </el-row>
                 </el-form-item>
             </el-tooltip>
-            <el-tooltip placement="left">
+            <el-tooltip placement="left" :open-delay="500">
                 <div slot="content">
-                    在此可设置该细节生效时间范围内的年净收入,<br/>
+                    在此可设置该现金流生效时间范围内的年净收入,<br/>
                     年净收入就是指收入减去支出，可以为负数，<br/>
-                    特别注意，这里不要算入你理财的盈亏，<br/>
-                    请输入整数，这里的单位为元。<br/><br/>
-                    例如：引用上一个输入框中的例子，<br/>
-                    细节a的年净收入是100,000；b是-10,000，<br/>
-                    则在计算结果中的第4、5、6、7、8、9年（共6年），<br/>
+                    特别注意，这里不要算入你理财的盈亏，<br/><br/>
+                    例如：引用上面的例子，<br/>
+                    现金流a的年净收入是100,000；b是-10,000，<br/>
+                    则在计算结果中的第3、4年的年净收入为90,000，<br/>
                 </div>
                 <el-form-item label="年净收入">
                     <el-input v-model="cfNet">
@@ -458,9 +468,14 @@
                     </el-input>
                 </el-form-item>
             </el-tooltip>
-            <el-tooltip placement="left">
+            <el-tooltip placement="left" :open-delay="500">
                 <div slot="content">
-                    待定
+                    此处设置的年入增长仅影响该现金流，不影响其他现金流，<br/><br/>
+                    例如：继续上面的例子，现金流a的年入增长为10%，<br/>
+                    则第2年a的年净收入为110,000，第三年为121,000，以此类推<br/>
+                    但不影响现金流b的年净收入，<br/>
+                    此处为了方便配置，可以直接引用上面设置好的CPI涨跌<br/>
+                    *CPI：居民消费指数，其涨幅可以大致代表物价的涨幅<br/>
                 </div>
                 <el-form-item>
                     <el-col :span="4">年入增长</el-col>
@@ -491,15 +506,15 @@
             <el-form-item label="名称">
                 <el-input maxlength="16" v-model="mpName" show-word-limit></el-input>
             </el-form-item>
-            <el-tooltip placement="left">
+            <el-tooltip placement="left" :open-delay="500">
                 <div slot="content">
-                    因一个计划中，多个细节会叠加到计算结果中,<br/>
-                    所以在此可设置某一细节的生效时间范围，<br/>
+                    多个理财会叠加,<br/>
+                    所以在此可设置某一理财的生效时间范围，<br/>
                     包含起始年，但不包含结束年。<br/><br/>
-                    例如：某一个计划内有两个细节a和b，<br/>
+                    例如：某一个计划内有两个理财a和b，<br/>
                     a生效时间为第1年到第5年，b为第3年到第7年，<br/>
-                    则在计算结果中的第3、4年（共2年）将受这两个细节叠加影响，<br/>
-                    而第1、2年则受a影响，第
+                    则在计算结果中的第3、4年将受这两个理财叠加影响，<br/>
+                    而第1、2年则受a影响，第5、6年受b影响
                 </div>
                 <el-form-item>
                     <el-row type="flex" justfiy="space-around">
@@ -514,15 +529,12 @@
                     </el-row>
                 </el-form-item>
             </el-tooltip>
-            <el-tooltip placement="left">
+            <el-tooltip placement="left" :open-delay="500">
                 <div slot="content">
-                    在此可设置该细节生效时间范围内的年净收入,<br/>
-                    年净收入就是指收入减去支出，可以为负数，<br/>
-                    特别注意，这里不要算入你理财的盈亏，<br/>
-                    请输入整数，这里的单位为元。<br/><br/>
-                    例如：引用上一个输入框中的例子，<br/>
-                    细节a的年净收入是100,000；b是-10,000，<br/>
-                    则在计算结果中的第4、5、6、7、8、9年（共6年），<br/>
+                    在此可设置该理财生效时间范围内的年化收益率,<br/><br/>
+                    例如：引用上面的例子，<br/>
+                    理财a的年化收益率是10%；b是5%，<br/>
+                    则在计算结果中的第3、4年的收益率就是15%（假设a、b均满仓），<br/>
                 </div>
                 <el-form-item label="仓位占比">
                     <el-input v-model="mpProportion">
@@ -530,9 +542,13 @@
                     </el-input>
                 </el-form-item>
             </el-tooltip>
-            <el-tooltip placement="left">
+            <el-tooltip placement="left" :open-delay="500">
                 <div slot="content">
-                    待定
+                    在此可设置该理财生效时间范围内的仓位,<br/>
+                    仓位仅对该理财有效，对其他理财不影响<br/><br/>
+                    例如：引用上面的例子，<br/>
+                    理财a的年化收益率是10%，若仓位是50%<br/>
+                    则在计算结果中的第1年的收益率就是5%<br/>
                 </div>
                 <el-form-item label="理财年化">
                     <el-input v-model="mpRate">

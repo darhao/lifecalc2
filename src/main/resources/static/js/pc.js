@@ -6,26 +6,26 @@ var app = new Vue({
     el: "#app",
 
     mounted: function () {
-        //开始loading
-        this.loading = true;
+        //vue加载完毕后隐藏loading
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('appLoading').style.display = 'none';
+        //调用计算
+        this.onClickPlanCalc();
         //取出userInfo
         if(localStorage.getItem("userInfo") != null){
             this.userInfo = JSON.parse(localStorage.getItem("userInfo"));
         }else if(sessionStorage.getItem("userInfo") != null){
             this.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
         }else{
-            //结束loading
-            this.loading = false;
             return;
         }
         //获取计划列表数据
         this.postPagePlan(1);
-        //结束loading
-        this.loading = false;
     },
 
     data: {
         //加载
+        firstLoadFlag: true,
         loading: false,
 
         //登录
@@ -45,14 +45,29 @@ var app = new Vue({
         planTotalPage:null,
         planCurrentPage:null,
         planList:[],
-        planName:null,
-        planCpi:null,
-        planAge:null,
-        planInit:null,
+        planName:"我的计划A",
+        planCpi:"3",
+        planAge:"25",
+        planInit:"100000",
         planUpdateId:null,
 
         //理财
-        mpList:[],
+        mpList:[
+            {
+                name: "股票型基金",
+                start: "1",
+                end: "11",
+                earnRate: "20",
+                earnProportion: "100"
+            },
+            {
+                name: "债券型基金",
+                start: "11",
+                end: "60",
+                earnRate: "8",
+                earnProportion: "100"
+            }
+        ],
         mpName:null,
         mpStart:null,
         mpEnd:null,
@@ -62,7 +77,50 @@ var app = new Vue({
         mpUpdateRow:null,
 
         //现金流
-        cfList:[],
+        cfList:[
+            {
+                name: "打工",
+                start: "1",
+                end: "11",
+                net: "150000",
+                netRate: "引用CPI"
+            },
+            {
+                name: "退休",
+                start: "11",
+                end: "60",
+                net: "-85000",
+                netRate: "引用CPI"
+            },
+            {
+                name: "买房首付",
+                start: "4",
+                end: "5",
+                net: "-1000000",
+                netRate: "0"
+            },
+            {
+                name: "买房月供",
+                start: "5",
+                end: "35",
+                net: "-96000",
+                netRate: "0"
+            },
+            {
+                name: "买房后房租减免",
+                start: "4",
+                end: "60",
+                net: "48000",
+                netRate: "引用CPI"
+            },
+            {
+                name: "社保",
+                start: "35",
+                end: "60",
+                net: "36000",
+                netRate: "引用CPI"
+            }
+        ],
         cfName:null,
         cfStart:null,
         cfEnd:null,
@@ -74,47 +132,18 @@ var app = new Vue({
 
         //图表
         chartData: {
-            columns: ['日期', '访问用户', '下单用户', '下单率'],
-            rows: [
-              { '日期': '1/1', '访问用户': 1393, '下单用户': 1093, '下单率': 0.32 },
-              { '日期': '1/2', '访问用户': 3530, '下单用户': 3230, '下单率': 0.26 },
-              { '日期': '1/3', '访问用户': 2923, '下单用户': 2623, '下单率': 0.76 },
-              { '日期': '1/4', '访问用户': 1723, '下单用户': 1423, '下单率': 0.49 },
-              { '日期': '1/5', '访问用户': 3792, '下单用户': 3492, '下单率': 0.323 },
-              { '日期': '1/6', '访问用户': 4593, '下单用户': 4293, '下单率': 0.78 }
-            ]
+            columns: ["年龄", "年初总资产"],
+            rows: []
+        },
+        chartSettings: {
+            metricsType: {
+                "年初总资产": "0.0a"
+            },
+            area: true
         },
 
         //计算结果
-        calcResultList:[
-            {
-                year:1,
-                age:25,
-                init:10000,
-                earnRate:"8",
-                earn:800,
-                net:10000,
-                balance:20800
-            },
-            {
-                year:1,
-                age:25,
-                init:10000,
-                earnRate:"8",
-                earn:800,
-                net:10000,
-                balance:20800
-            },
-            {
-                year:1,
-                age:25,
-                init:10000,
-                earnRate:"8",
-                earn:800,
-                net:10000,
-                balance:20800
-            }
-        ]
+        calcResultList: []
 
     },
     methods:{
@@ -161,6 +190,12 @@ var app = new Vue({
                         that.planCurrentPage = response.data.data.currentPage;
                         that.planTotalPage = response.data.data.totalPage;
                         that.planList = response.data.data.records;
+                        //如果有至少一条计划就加载到右边（只在页面首次加载触发）
+                        if(that.planList.length > 0 && that.firstLoadFlag){
+                            that.onClickPlanRow(0);
+                        }
+                        //设置首次加载标记
+                        that.firstLoadFlag = false;
                     }else if(response.data.code === 211){
                         //清除userInfo
                         that.onClickSignOut();
@@ -174,6 +209,39 @@ var app = new Vue({
                     that.loading = false;
                  });
         },
+
+        onClickPlanCopy: function(index){
+            let that = this;
+            //开始loading
+            that.loading = true;
+            //请求
+            let params = new URLSearchParams();
+            params.append("token", that.userInfo.token);
+            params.append("planId", that.planList[index].id);
+            axios.post("/plan/copy", params)
+                .then(function (response) {
+                    if(response.data.code === 200){
+                        //刷新
+                        that.postPagePlan(that.planCurrentPage);
+                        that.$message({
+                            type: 'success',
+                            message: '复制成功！'
+                        });
+                    }else if(response.data.code === 211){
+                        //清除userInfo
+                        that.onClickSignOut();
+                        that.loading = false;
+                        that.showSignInStateExpirMessage();
+                    }else{
+                        that.showSystemErrorMessage(response.data.data);
+                        that.loading = false;
+                    }
+                 }).catch(function (error) {
+                    that.showSystemErrorMessage(error);
+                    that.loading = false;
+                 });
+        },
+
         onClickPlanDelete: function(index){
             let that = this;
             //确认删除框
@@ -218,21 +286,18 @@ var app = new Vue({
             });
         },
         onClickPlanSave: function(){
+            //如果没有登录就弹出登录框
+            if(this.userInfo === null){
+                this.onClickSignIn();
+                return;
+            }
             //参数校验
             if(this.planName === null || this.planName.trim().length === 0){
                 this.$message({message: "请填写名称", type: "error"});
                 return;
             }
-            if(this.planAge === null || this.planAge.trim().length === 0 || !Number.isInteger(Number(this.planAge)) || Number(this.planAge) < 0){
-                this.$message({message: "年龄请填写不小于0的整数", type: "error"});
-                return;
-            }
-            if(this.planCpi === null || this.planCpi.trim().length === 0 || !Number.isInteger(Number(this.planCpi))){
-                this.$message({message: "CPI请填写整数", type: "error"});
-                return;
-            }
-            if(this.planInit === null || this.planInit.trim().length === 0 || !Number.isInteger(Number(this.planInit))){
-                this.$message({message: "资产请填写整数", type: "error"});
+            //顶部表单校验
+            if(!this.topFormCheck()){
                 return;
             }
             //开始loading
@@ -310,6 +375,22 @@ var app = new Vue({
             }
         },
 
+        topFormCheck: function(){
+            if(this.planAge === null || this.planAge.trim().length === 0 || !Number.isInteger(Number(this.planAge)) || Number(this.planAge) < 0){
+                this.$message({message: "年龄请填写不小于0的整数", type: "error"});
+                return false;
+            }
+            if(this.planCpi === null || this.planCpi.trim().length === 0 || !Number.isInteger(Number(this.planCpi))){
+                this.$message({message: "CPI请填写整数", type: "error"});
+                return false;
+            }
+            if(this.planInit === null || this.planInit.trim().length === 0 || !Number.isInteger(Number(this.planInit))){
+                this.$message({message: "资产请填写整数", type: "error"});
+                return false;
+            }
+            return true;
+        },
+
         clearPlan: function(){
             this.planUpdateId = null;
             this.planName = null;
@@ -318,7 +399,7 @@ var app = new Vue({
             this.planInit = null;
             this.mpList = [];
             this.cfList = [];
-            this.chartData = [];
+            this.chartData.rows = [];
             this.calcResultList = [];
         },
 
@@ -365,7 +446,7 @@ var app = new Vue({
                                 that.mpList.push(obj);
                             }
                         }
-                         //计算
+                         //调用计算
                         that.onClickPlanCalc();
                     }else if(response.data.code === 211){
                         //清除userInfo
@@ -384,7 +465,99 @@ var app = new Vue({
 
         //计算
         onClickPlanCalc: function(){
-
+            //顶部表单校验
+            if(!this.topFormCheck()){
+                return;
+            }
+            //清空图表和计算结果
+            this.chartData.rows = [];
+            this.calcResultList = [];
+            //计算x轴长度（取理财和现金流中最大的结束年）
+            let x = 0;
+            for(i in this.mpList){
+                let mp = this.mpList[i];
+                if(Number(mp.end) > x){
+                    x = Number(mp.end);
+                }
+            }
+            for(i in this.cfList){
+                let cf = this.cfList[i];
+                if(Number(cf.end) > x){
+                    x = Number(cf.end);
+                }
+            }
+            if(x === 0){
+                this.$message({
+                    message: "需填写现金流或理财表至少1项，以完成计算",
+                    type: "info"
+                });
+                return;
+            }
+            //定义计算过程数组并初始化元素，长度为x
+            let cps = new Array(x);
+            for(let i = 0; i < x; i++){
+                cps[i] = {
+                    year: 1 + i,
+                    age: Number(this.planAge) + i,
+                    init: 0,
+                    earnRate: 0,
+                    earn: 0,
+                    net: 0,
+                    balance: 0
+                };
+            }
+            //遍历现金流表
+            for(a in this.cfList){
+                let cf = this.cfList[a];
+                let i = Number(cf.start);
+                let j = 0;
+                let k = cf.netRate === "引用CPI" ? this.planCpi : cf.netRate;
+                while(i < Number(cf.end)){
+                    cps[i-1].net += cf.net * Math.pow(1 + k/100.0, j);
+                    i++;
+                    j++;
+                }
+            }
+            //遍历理财表
+            for(a in this.mpList){
+                let mp = this.mpList[a];
+                let i = Number(mp.start);
+                while(i < Number(mp.end)){
+                    cps[i-1].earnRate += (mp.earnRate/100.0) * (mp.earnProportion/100.0);
+                    i++;
+                }
+            }
+            //遍历cps并完成其它计算项
+            for(let i = 0; i < x; i++){
+                //计算年初结余
+                if(i === 0){
+                    cps[i].init = Number(this.planInit);
+                }else{
+                    cps[i].init = cps[i-1].balance;
+                }
+                //计算总理财收入
+                cps[i].earn = cps[i].init * cps[i].earnRate;
+                //计算年末结余
+                cps[i].balance = cps[i].init + cps[i].earn + cps[i].net;
+            }
+            //设置计算过程数组，百分号转化，保留个位
+            for(let i = 0; i < x; i++){
+                cps[i].init = cps[i].init.toFixed(0);
+                cps[i].balance = cps[i].balance.toFixed(0);
+                cps[i].net = cps[i].net.toFixed(0);
+                cps[i].earn = cps[i].earn.toFixed(0);
+                cps[i].earnRate = (cps[i].earnRate * 100).toFixed(0) + "%";
+            }
+            this.calcResultList = cps;
+            //设置图表
+            let chartRows = new Array(x);
+            for(let i = 0; i < x; i++){
+                chartRows[i] = {
+                    "年龄": this.calcResultList[i].age.toString(),
+                    "年初总资产": this.calcResultList[i].init
+                };
+            }
+            this.chartData.rows = chartRows;
         },
 
 
@@ -398,12 +571,12 @@ var app = new Vue({
         onClickSignUpFromSignIn: function(){
             this.signUpDialogVisible = true;
             this.signInDialogVisible = false;
-            onCloseSignInDialog();
+            this.onCloseSignInDialog();
         },
         onClickSignInFromSignUp: function(){
             this.signUpDialogVisible = false;
             this.signInDialogVisible = true;
-            onCloseSignUpDialog();
+            this.onCloseSignUpDialog();
         },
         onCloseSignInDialog: function(){
             this.signInUserName = null;
@@ -458,6 +631,9 @@ var app = new Vue({
                             message: "登录成功",
                             type: "success"
                         });
+                        //刷新列表
+                        that.firstLoadFlag = true;
+                        that.postPagePlan(1);
                         //关闭对话框
                         that.signInDialogVisible = false;
                         that.onCloseSignInDialog();
